@@ -63,3 +63,17 @@ app.prepare().then(() => {
       console.log(`> Ready on http://${hostname}:${port}`);
     });
 });
+// server.js-ის განახლება ახალი ივენთების დასამატებლად
+// დაამატეთ ეს კოდი არსებულ socket.io კოდში
+
+socket.on("sendMessage", ({conversationId, content, recipientUsername}) => {
+  const receiver = getUser(recipientUsername);
+  
+  if (receiver) {
+    io.to(receiver.socketId).emit("new_message", {
+      conversationId,
+      content,
+      senderId: socket.id,
+    });
+  }
+});

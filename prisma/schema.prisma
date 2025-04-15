@@ -30,6 +30,9 @@ model User {
 
   followers  Follow[] @relation("UserFollowers")
   followings Follow[] @relation("UserFollowings")
+
+  messages                Message[]                 @relation("SentMessages")
+  conversationParticipant ConversationParticipant[]
 }
 
 model Post {
@@ -93,4 +96,55 @@ model Follow {
 
   follower  User @relation("UserFollowers", fields: [followerId], references: [id])
   following User @relation("UserFollowings", fields: [followingId], references: [id])
+}
+
+// პირველ რიგში დავამატოთ ახალი მოდელები სქემაში - prisma/schema.prisma ფაილში
+
+// 1. ჩატის ოთახის მოდელი
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ურთიერთობები
+  messages     Message[]
+  participants ConversationParticipant[]
+
+  @@map("conversations")
+}
+
+// 2. საუბარში მონაწილის მოდელი
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+  readUntil      DateTime @default(now())
+
+  // ურთიერთობები
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+// 3. შეტყობინების მოდელი
+model Message {
+  id             String   @id @default(cuid())
+  content        String   @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  conversationId String
+  senderId       String
+  read           Boolean  @default(false)
+
+  // რელაციები
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(name: "SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@map("messages")
 }

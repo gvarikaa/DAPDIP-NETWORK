@@ -24,12 +24,13 @@ const menuList = [
   //   link: "/",
   //   icon: "notification.svg",
   // },
-  {
-    id: 4,
-    name: "Messages",
-    link: "/",
-    icon: "message.svg",
-  },
+  // src/components/LeftBar.tsx-ში მოძებნეთ Messages ელემენტი და შეცვალეთ შემდეგნაირად:
+{
+  id: 4,
+  name: "Messages",
+  link: "/messages", // "/"-ის ნაცვლად "/messages"
+  icon: "message.svg",
+},
   {
     id: 5,
     name: "Bookmarks",
