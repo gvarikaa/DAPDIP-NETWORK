@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import { useSocket } from "@/providers/SocketProvider";
-import Image from "next/image";
+import Image from "@/components/Image"; // შევცვალეთ იმპორტი პროექტის სტილისთვის
 
 interface MessagesListProps {
   conversationId: string;
@@ -72,15 +72,15 @@ export default function MessagesList({ conversationId }: MessagesListProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+        <div className="animate-spin h-8 w-8 border-4 border-iconBlue rounded-full border-t-transparent"></div>
       </div>
     );
   }
 
   if (!messages?.length) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-500">
-        <p className="text-center">No messages yet.<br />Start a conversation!</p>
+      <div className="h-full flex items-center justify-center text-textGray">
+        <p className="text-center">ჯერ არ არის შეტყობინებები.<br />დაიწყეთ საუბარი!</p>
       </div>
     );
   }
@@ -113,7 +113,7 @@ export default function MessagesList({ conversationId }: MessagesListProps) {
       {groupedMessages.map((group, groupIndex) => (
         <div key={group.date} className="space-y-4">
           <div className="flex justify-center">
-            <div className="text-xs bg-gray-800 text-gray-400 rounded-full px-3 py-1">
+            <div className="text-xs bg-inputGray text-textGray rounded-full px-3 py-1">
               {new Date(group.date).toLocaleDateString(undefined, {
                 weekday: 'long',
                 month: 'short',
@@ -135,22 +135,23 @@ export default function MessagesList({ conversationId }: MessagesListProps) {
                     {!isMyMessage && (
                       <div className="flex-shrink-0 h-8 w-8 relative rounded-full overflow-hidden">
                         <Image
-                          fill
-                          src={message.sender.img || '/placeholder-user.png'}
+                          path={message.sender.img || "general/noAvatar.png"}
                           alt={message.sender.username}
-                          className="object-cover"
+                          w={32}
+                          h={32}
+                          tr={true}
                         />
                       </div>
                     )}
                     <div 
                       className={`rounded-2xl py-2 px-4 break-words ${
                         isMyMessage 
-                          ? 'bg-blue-600 text-white rounded-br-none' 
-                          : 'bg-gray-700 text-white rounded-bl-none'
+                          ? 'bg-iconBlue text-white rounded-br-none' 
+                          : 'bg-inputGray text-white rounded-bl-none'
                       }`}
                     >
                       <p>{message.content}</p>
-                      <div className={`text-xs ${isMyMessage ? 'text-blue-200' : 'text-gray-400'} mt-1`}>
+                      <div className={`text-xs ${isMyMessage ? 'text-blue-200' : 'text-textGray'} mt-1`}>
                         {format(new Date(message.createdAt), 'p')}
                       </div>
                     </div>

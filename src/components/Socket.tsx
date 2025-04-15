@@ -1,19 +1,25 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { socket } from "../socket";
+import { getSocket } from "../socket";
 import { useUser } from "@clerk/nextjs";
 
 export default function Socket() {
+  const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
-
   const { user } = useUser();
 
   useEffect(() => {
-    if (socket.connected) {
-      onConnect();
-    }
+    const setupSocket = async () => {
+      const socketInstance = await getSocket();
+      setSocket(socketInstance);
+    };
+
+    setupSocket();
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
 
     function onConnect() {
       setIsConnected(true);
@@ -22,6 +28,7 @@ export default function Socket() {
       socket.io.engine.on("upgrade", (transport) => {
         setTransport(transport.name);
       });
+      
       if (user) {
         socket.emit("newUser", user.username);
       }
@@ -32,6 +39,10 @@ export default function Socket() {
       setTransport("N/A");
     }
 
+    if (socket.connected) {
+      onConnect();
+    }
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
 
@@ -39,9 +50,15 @@ export default function Socket() {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
     };
-  }, [user]);
+  }, [socket, user]);
 
   return (
-    <span></span>
+    <div>
+      {isConnected ? (
+        <p>Connected via {transport} transport.</p>
+      ) : (
+        <p>Disconnected from the server.</p>
+      )}
+    </div>
   );
 }

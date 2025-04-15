@@ -9,6 +9,7 @@ import MessagesList from "./MessagesList";
 import MessageInput from "./MessageInput";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSocket } from "@/providers/SocketProvider";
+import Image from "@/components/Image"; // შევცვალეთ იმპორტი პროექტის სტილისთვის
 
 type Conversation = {
   id: string;
@@ -28,7 +29,7 @@ type Conversation = {
 
 export default function MessagesContainer() {
   const { user } = useUser();
-  const { socket } = useSocket();
+  const { socket, isConnected } = useSocket();
   const queryClient = useQueryClient();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -43,8 +44,9 @@ export default function MessagesContainer() {
 
     // სოკეტებთან დაკავშირება
     if (socket) {
-      socket.on("new_message", (data: any) => {
+      const handleNewMessage = (data: any) => {
         if (data.conversationId) {
+          console.log("New message received:", data);
           // განვაახლოთ საუბრების სია
           fetchConversations();
           
@@ -56,10 +58,12 @@ export default function MessagesContainer() {
             });
           }
         }
-      });
+      };
+
+      socket.on("new_message", handleNewMessage);
 
       return () => {
-        socket.off("new_message");
+        socket.off("new_message", handleNewMessage);
       };
     }
   }, [socket, selectedConversation, user, queryClient, router]);
@@ -117,6 +121,15 @@ export default function MessagesContainer() {
         
         // განვაახლოთ საუბრების სია
         fetchConversations();
+
+        // გავაგზავნოთ შეტყობინება სოკეტით
+        if (socket && selectedConversation.participants[0]) {
+          socket.emit("sendMessage", {
+            conversationId: selectedConversation.id,
+            content,
+            recipientUsername: selectedConversation.participants[0].username
+          });
+        }
       }
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -130,7 +143,8 @@ export default function MessagesContainer() {
 
   return (
     <div className="grid md:grid-cols-3 h-[calc(100vh-65px)]">
-      <div className="md:col-span-1 border-r border-neutral-800 overflow-y-auto">
+      {/* საუბრების სია */}
+      <div className="md:col-span-1 border-r border-borderGray overflow-y-auto">
         <ConversationList
           conversations={conversations}
           loading={loading}
@@ -139,18 +153,19 @@ export default function MessagesContainer() {
           onNewConversation={handleNewConversation}
         />
       </div>
+      {/* შეტყობინებების არე */}
       <div className="md:col-span-2 flex flex-col h-full">
         {selectedConversation ? (
           <>
             <div className="flex-1 overflow-y-auto p-4">
               <MessagesList conversationId={selectedConversation.id} />
             </div>
-            <div className="border-t border-neutral-800 p-3">
+            <div className="border-t border-borderGray p-3">
               <MessageInput onSendMessage={handleSendMessage} />
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
+          <div className="flex items-center justify-center h-full text-textGray">
             <div className="text-center">
               <p className="text-xl mb-2">დაიწყეთ ახალი საუბარი</p>
               <p className="text-sm">აირჩიეთ მომხმარებელი სიისგან ან დაიწყეთ ახალი საუბარი</p>

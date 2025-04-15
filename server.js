@@ -17,7 +17,7 @@ const addUser = (username, socketId) => {
 
   if (!isExist) {
     onlineUsers.push({ username, socketId });
-    console.log(username + "added!");
+    console.log(username + " added!");
   }
 };
 
@@ -42,11 +42,26 @@ app.prepare().then(() => {
 
     socket.on("sendNotification", ({ receiverUsername, data }) => {
       const receiver = getUser(receiverUsername);
+      
+      if (receiver) {
+        io.to(receiver.socketId).emit("getNotification", {
+          id: uuidv4(),
+          ...data,
+        });
+      }
+    });
 
-      io.to(receiver.socketId).emit("getNotification", {
-        id: uuidv4(),
-        ...data,
-      });
+    // ახალი მესიჯების ფუნქციონალი
+    socket.on("sendMessage", ({conversationId, content, recipientUsername}) => {
+      const receiver = getUser(recipientUsername);
+      
+      if (receiver) {
+        io.to(receiver.socketId).emit("new_message", {
+          conversationId,
+          content,
+          senderId: socket.id,
+        });
+      }
     });
 
     socket.on("disconnect", () => {
@@ -62,18 +77,4 @@ app.prepare().then(() => {
     .listen(port, () => {
       console.log(`> Ready on http://${hostname}:${port}`);
     });
-});
-// server.js-ის განახლება ახალი ივენთების დასამატებლად
-// დაამატეთ ეს კოდი არსებულ socket.io კოდში
-
-socket.on("sendMessage", ({conversationId, content, recipientUsername}) => {
-  const receiver = getUser(recipientUsername);
-  
-  if (receiver) {
-    io.to(receiver.socketId).emit("new_message", {
-      conversationId,
-      content,
-      senderId: socket.id,
-    });
-  }
 });

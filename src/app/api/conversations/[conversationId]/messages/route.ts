@@ -78,7 +78,7 @@ export async function GET(
 
 // ახალი მესიჯის დამატება არსებულ საუბარში
 export async function POST(
-  req: NextSqpუეიკquest,
+  req: NextRequest,
   { params }: { params: { conversationId: string } }
 ) {
   try {

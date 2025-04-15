@@ -1,6 +1,7 @@
 // src/components/messages/MessageInput.tsx
 import { useState, FormEvent, KeyboardEvent } from "react";
 import { SendHorizonal } from "lucide-react";
+import Image from "@/components/Image"; // შევცვალეთ იმპორტი პროექტის სტილისთვის
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void;
@@ -25,17 +26,17 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2">
+    <form onSubmit={handleSubmit} className="flex items-end gap-2 p-2">
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
-        className="flex-1 bg-gray-800 border border-neutral-700 rounded-lg p-3 min-h-24 max-h-40 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+        placeholder="დაწერეთ შეტყობინება..."
+        className="flex-1 bg-inputGray border border-borderGray rounded-lg p-3 min-h-24 max-h-40 resize-none focus:outline-none text-textGrayLight"
       />
       <button
         type="submit"
-        className="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 transition"
+        className="bg-iconBlue text-white rounded-full p-3 hover:bg-opacity-80 transition"
         disabled={!message.trim()}
       >
         <SendHorizonal size={20} />

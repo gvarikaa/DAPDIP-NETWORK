@@ -23,20 +23,28 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user) return;
 
+    // ერთი საერთო სოკეტის ინსტანცია მთელი აპლიკაციისთვის
     const socketInstance = io();
 
     socketInstance.on("connect", () => {
+      console.log("Socket connected!");
       setIsConnected(true);
-      socketInstance.emit("newUser", user.username);
+      
+      // ემიტი მხოლოდ წარმატებული დაკავშირების შემდეგ
+      if (user?.username) {
+        socketInstance.emit("newUser", user.username);
+      }
     });
 
     socketInstance.on("disconnect", () => {
+      console.log("Socket disconnected!");
       setIsConnected(false);
     });
 
     setSocket(socketInstance);
 
     return () => {
+      console.log("Cleaning up socket connection");
       socketInstance.disconnect();
     };
   }, [user]);
